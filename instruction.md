@@ -1,16 +1,26 @@
 # Restore the order-service rollout
 
-You are the on-call engineer for a small TypeScript order service. A recent containerized deployment is unhealthy: the image builds inconsistently, the service is not reachable on the expected port, and Kubernetes health checks do not succeed.
+A recent deployment introduced configuration drift between the application, Docker image, and Kubernetes manifest.
 
 Everything you need is under `/app/`.
 
-Your job is to restore the service so that it:
+Restore the service so that:
+- the container builds successfully
+- the application runs correctly on port 3000
+- the health endpoint responds at `GET /healthz`
+- the Kubernetes manifest is consistent with the actual runtime configuration
 
-- builds successfully with Docker from `/app/`
-- starts successfully with `docker run -p 3000:3000 order-service`
-- responds successfully on `GET /healthz`
-- serves order data successfully on `GET /api/orders`
-- has Kubernetes manifest settings that are consistent with the actual container runtime and health endpoint
+Do not modify the tests or add new runtime dependencies. Keep the container running as a non-root user.
+
+## Target behavior
+
+After your fix:
+
+- the Docker build from `/app/` succeeds
+- the container starts successfully on port `3000`
+- `GET /healthz` returns HTTP 200 with `{"status":"ok"}`
+- `GET /api/orders` returns HTTP 200 with a JSON array of orders
+- the Kubernetes manifest is consistent with the actual container port, environment configuration, and health check path
 
 ## Constraints
 
@@ -24,7 +34,7 @@ Your job is to restore the service so that it:
 Your submission should make the following true:
 
 - `docker build -t order-service /app/` succeeds
-- `docker run -d -p 3000:3000 --name order-service order-service` starts and stays healthy
+- `docker run -d -p 3000:3000 --name order-service order-service` starts successfully
 - `curl http://localhost:3000/healthz` returns HTTP 200 with `{"status":"ok"}`
 - `curl http://localhost:3000/api/orders` returns HTTP 200 with a JSON array of orders
-- `k8s-deployment.yaml` is internally consistent with the application and container runtime
+- `k8s-deployment.yaml` is consistent with the application's port and health endpoint

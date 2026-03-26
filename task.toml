@@ -1,16 +1,23 @@
-[task]
-name = "fix-typescript-microservice-deployment"
-description = "Debug and fix a broken TypeScript microservice that fails Kubernetes health checks on startup due to multiple interacting misconfigurations."
+version = "1.0"
+
+[metadata]
+author_name = "Enock KIpkoech"
+author_email = "enockkipkoech19@gmail.com"
 difficulty = "hard"
-domain = "devops"
+difficulty_explanation = "Debug and fix a broken TypeScript microservice that fails Kubernetes health checks on startup due to multiple interacting misconfigurations."
+category = "devops"
 tags = ["kubernetes", "typescript", "docker", "ci-cd", "health-checks", "debugging"]
 
-[environment.runtime]
-python = "3.12"
-
-[environment.resources]
-memory = "512m"
-cpu = "1.0"
-
 [verifier]
+timeout_sec = 120.0
 user = "root"
+
+[agent]
+timeout_sec = 300.0
+user = "appuser"
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240

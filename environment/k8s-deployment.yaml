@@ -19,33 +19,33 @@ spec:
           image: order-service:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - containerPort: 3000
           env:
-            - name: APP_PORT
-              value: "8080"
+            - name: PORT
+              value: '3000'
             - name: NODE_ENV
-              value: "production"
+              value: 'production'
           livenessProbe:
             httpGet:
-              path: /health
-              port: 8080
+              path: /healthz
+              port: 3000
             initialDelaySeconds: 10
             periodSeconds: 15
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
-              port: 8080
+              path: /healthz
+              port: 3000
             initialDelaySeconds: 5
             periodSeconds: 10
             failureThreshold: 3
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "100m"
+              memory: '128Mi'
+              cpu: '100m'
             limits:
-              memory: "256Mi"
-              cpu: "500m"
+              memory: '256Mi'
+              cpu: '500m'
 ---
 apiVersion: v1
 kind: Service
@@ -57,5 +57,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: 3000
   type: ClusterIP
