@@ -1,0 +1,16 @@
+[task]
+name = "fix-typescript-microservice-deployment"
+description = "Debug and fix a broken TypeScript microservice that fails Kubernetes health checks on startup due to multiple interacting misconfigurations."
+difficulty = "hard"
+domain = "devops"
+tags = ["kubernetes", "typescript", "docker", "ci-cd", "health-checks", "debugging"]
+
+[environment.runtime]
+python = "3.12"
+
+[environment.resources]
+memory = "512m"
+cpu = "1.0"
+
+[verifier]
+user = "root"
