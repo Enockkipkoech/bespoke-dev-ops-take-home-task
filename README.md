@@ -162,6 +162,8 @@ Docker ensures reproducibility
 .env is ignored (contains API keys)
 Designed to prevent trivial or hardcoded solutions
 
+![GROQ Results](image2.png)
+
 ### 👤 Author
 
 Enock KIpkoech
