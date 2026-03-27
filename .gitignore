@@ -11,3 +11,5 @@ wheels/
 .env
 environment/node_modules/
 ./environment/node_modules/
+
+jobs/
