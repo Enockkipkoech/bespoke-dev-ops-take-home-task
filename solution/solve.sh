@@ -1,52 +1,43 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
-set -x
 
-echo "==> Fixing files using Python to avoid sed permission issues..."
+score=0
 
-python3 << 'PYEOF'
-import re
+add_score () {
+  score=$(python3 - <<PY
+s=float("$score")
+print(s + $1)
+PY
+)
+}
 
-# Fix src/index.ts
-with open('/app/src/index.ts', 'r') as f:
-    content = f.read()
+# ---------------- Dockerfile (0.4) ----------------
+grep -q 'ENV PORT=3000' /app/Dockerfile && add_score 0.10
+grep -q 'EXPOSE 3000' /app/Dockerfile && add_score 0.05
+grep -q 'AS builder' /app/Dockerfile && add_score 0.10
+grep -q 'npm ci --omit=dev' /app/Dockerfile && add_score 0.15
 
-content = content.replace('process.env.APP_PORT', 'process.env.PORT')
-content = content.replace('|| 8080', '|| 3000')
-content = content.replace("app.get('/health',", "app.get('/healthz',")
-content = content.replace('app.get("/health",', 'app.get("/healthz",')
+# ---------------- App (0.2) ----------------
+grep -q 'process.env.PORT' /app/src/index.ts && add_score 0.05
+grep -q '/healthz' /app/src/index.ts && add_score 0.10
+grep -q '/api/orders' /app/src/index.ts && add_score 0.05
 
-with open('/app/src/index.ts', 'w') as f:
-    f.write(content)
+# ---------------- K8s (0.2) ----------------
+grep -q 'containerPort: 3000' /app/k8s-deployment.yaml && add_score 0.05
+grep -q "value: '3000'" /app/k8s-deployment.yaml && add_score 0.05
+grep -q 'path: /healthz' /app/k8s-deployment.yaml && add_score 0.10
 
-print("Fixed src/index.ts")
+# ---------------- Runtime (0.2) ----------------
+cd /app
+node dist/index.js >/tmp/app.log 2>&1 &
+PID=$!
+sleep 2
 
-# Fix k8s-deployment.yaml
-with open('/app/k8s-deployment.yaml', 'r') as f:
-    content = f.read()
+curl -sf http://localhost:3000/healthz | grep -q '"status":"ok"' && add_score 0.10
+curl -sf http://localhost:3000/api/orders | grep -q 'ord-001' && add_score 0.10
 
-content = content.replace('containerPort: 8080', 'containerPort: 3000')
+kill $PID >/dev/null 2>&1 || true
 
-with open('/app/k8s-deployment.yaml', 'w') as f:
-    f.write(content)
-
-print("Fixed k8s-deployment.yaml")
-
-# Fix Dockerfile
-with open('/app/Dockerfile', 'r') as f:
-    content = f.read()
-
-content = content.replace('ENV APP_PORT=8080', 'ENV PORT=3000')
-content = content.replace('EXPOSE 8080', 'EXPOSE 3000')
-
-with open('/app/Dockerfile', 'w') as f:
-    f.write(content)
-
-print("Fixed Dockerfile")
-PYEOF
-
-echo "==> Verification"
-grep "process.env.PORT\|app.get(" /app/src/index.ts
-grep "containerPort" /app/k8s-deployment.yaml
-grep "ENV PORT\|EXPOSE" /app/Dockerfile
-echo "==> Done"
+python3 - <<PY
+print(round(min(float("$score"), 1.0), 2))
+PY

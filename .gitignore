@@ -9,4 +9,5 @@ wheels/
 # Virtual environments
 .venv
 .env
- environment/node_modules/
+environment/node_modules/
+./environment/node_modules/

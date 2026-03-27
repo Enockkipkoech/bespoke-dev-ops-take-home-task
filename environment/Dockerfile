@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip3 install --no-cache-dir pytest --break-system-packages
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci 
 
 RUN groupadd -r appgroup && useradd -r -m -d /home/appuser -s /bin/bash -g appgroup appuser
 
